@@ -1,0 +1,14 @@
+# Python bytecode (created automatically when you run the game)
+__pycache__/
+*.pyc
+
+# Local Virtual Environments (if you ever use one)
+venv/
+env/
+
+# VS Code settings
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
