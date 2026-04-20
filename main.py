@@ -2,11 +2,9 @@ from player import Player
 from dealer import Dealer
 from deck import Deck
 from helper_functions import wanna_play_again
-from helper_functions import get_bet_amount
-from helper_functions import calculate_sum
-from helper_functions import endgame
-from helper_functions import show_dealer_cards_half, show_player_cards
 from helper_functions import wanna_hit
+from helper_functions import endgame
+
 
 player = Player(500, "Jatin")
 dealer = Dealer()
@@ -15,73 +13,87 @@ wanna_play = True
 while wanna_play:
     deck = Deck()
     deck.deck_shuffle()
-    player.player_cards = []
-    dealer.dealer_cards = []
+
+    # Release the old cards from last Bet
+    player.reset_hand()
+    dealer.reset_hand()
     print(f"\n--------------------------------------------")
-    print(f"Your wallet Amount: {player.wallet_amount}")
-    while True:
-        bet_amount = get_bet_amount()
-        if (bet_amount <= player.wallet_amount):
-            player.wallet_amount -= bet_amount
-            break
-        else:
-            print(
-                f"place a bet under your wallet amount : {player.wallet_amount}\n")
-            continue
-    print(f"Your wallet amount after placing Bet is: {player.wallet_amount}")
+    print(f"Your wallet Amount: {player.get_wallet_amount()}")
+    bet_amount = player.place_bet()
+
     # We have a bet Amount: Now we can start the game
     for _ in range(2):
         player.add_card(deck.draw_one())
         dealer.add_card(deck.draw_one())
     # now both have 2 cards in their hand
 
-    player_sum = calculate_sum(player.player_cards)
-    dealer_sum = calculate_sum(dealer.dealer_cards)
+    # update card sum for both
+    player.update_card_sum()
+    dealer.update_card_sum()
 
     # check for a BlackJack
-    if player_sum == 21:
-        verdict = f"BlackJack!!, {player.name} won, and will get 9* bet amount: {9*bet_amount}! as winning amount!"
-        endgame(verdict, dealer, dealer_sum,
-                player, player_sum, bet_amount*9)
+    if player.has_blackjack() and dealer.has_blackjack():
+        # Tie
+        verdict = f"Its a Tie! as Both Players got Blackjack!! adding Bet amount back to the {player.get_user_name()}"
+        endgame(verdict, dealer, player, bet_amount)
+    elif player.has_blackjack():
+        # but dealer does not have blackjack!
+        verdict = f"BlackJack!!, {player.get_user_name()} won, and will get 5* bet amount: {5*bet_amount}! as winning amount!"
+        endgame(verdict, dealer, player, bet_amount*5)
+    elif dealer.has_blackjack():
+        # but player does not have blackjack!
+        verdict = f"{dealer.get_user_name()} got BlackJack!! and {player.get_user_name()} lost the Round and Bet Money!!"
+        endgame(verdict, dealer, player, 0)
     else:
-        # Not a black Jack
-        while player_sum <= 21:
+        # No blackJack for anyone!!
+        while player.get_card_sum() < 21:
             print(f"\n-------New State Of cards in Both player Hands:--------\n")
-            show_dealer_cards_half(dealer)
-            show_player_cards(player)
-            print(f"Your card sum is: {player_sum}")
+            dealer.show_dealer_cards_half()
+            print(player)
             hit = wanna_hit()
             if hit:
                 player.add_card(deck.draw_one())
-                player_sum = calculate_sum(player.player_cards)
+                player.update_card_sum()
             else:
-                # wanna stay : so delaer's turn then break(important)
-                # Dealer's turn
-                while dealer_sum <= 21:
-                    if player_sum < dealer_sum <= 21:
-                        verdict = f"{dealer.name} Won with higher card sum <=21, {player.name} lost the bet!"
-                        endgame(verdict, dealer, dealer_sum,
-                                player, player_sum, 0)
-                        break
-                    else:
-                        # must draw a card from deck
-                        dealer.add_card(deck.draw_one())
-                        dealer_sum = calculate_sum(dealer.dealer_cards)
-                else:
-                    # no break means: dealer Busted
-                    verdict = f"{dealer.name} Busted!, {player.name} Won!, and {player.name} wins 2*bet amount: {2*bet_amount}"
-                    endgame(verdict, dealer, dealer_sum,
-                            player, player_sum, 2*bet_amount)
+                # sum==21 or Busted(>21)
                 break
-        else:
-            # came out without breaking means pplayer sum is greater than 21 and player busted!
-            verdict = f"{player.name} Busted!, and will loose the bet amount now!"
-            endgame(verdict, dealer, dealer_sum,
-                    player, player_sum, 0)
+        if player.get_card_sum() <= 21:
+            # player stayed or sum==21: falls into this if condition
 
-    if (player.wallet_amount > 0):
+            # Dealers Turn
+            while dealer.get_card_sum() < 17:
+                # According to Rules: Dealer must Hit until it's Sum >=17
+                dealer.add_card(deck.draw_one())
+                dealer.update_card_sum()
+
+            if dealer.get_card_sum() > 21:
+                # Dealer Busted, Player Won
+                verdict = f"{dealer.get_user_name()} Busted!, {player.get_user_name()} Won!, and {player.get_user_name()} wins 2*bet amount: {2*bet_amount}"
+                endgame(verdict, dealer, player, 2*bet_amount)
+
+            # now sum<=21 but comparing with player
+            elif dealer.get_card_sum() == player.get_card_sum():
+                # tie
+                verdict = f"Its a Push/Tie! as Both Players got same sum!! adding Bet amount back to the {player.get_user_name()}"
+                endgame(verdict, dealer, player, bet_amount)
+
+            elif dealer.get_card_sum() > player.get_card_sum():
+                # Dealer Won, Player lost! But no one Busted.
+                verdict = f"{dealer.get_user_name()} Won with higher card sum <=21, {player.get_user_name()} lost the bet!"
+                endgame(verdict, dealer, player, 0)
+            else:
+                # Player Won!, Dealer lost. But no one Busted.
+                verdict = f"{player.get_user_name()} Won with higher card sum <=21, {dealer.get_user_name()} lost the bet!, adding 2*bet amount: {2*bet_amount}"
+                endgame(verdict, dealer, player, 2*bet_amount)
+
+        else:
+            # sum>21 and player busted!
+            verdict = f"{player.get_user_name()} Busted!, and will loose the bet amount now!"
+            endgame(verdict, dealer, player, 0)
+
+    if (player.get_wallet_amount() > 0):
         wanna_play = wanna_play_again()
     else:
         print(
-            f"You cant play more bets: You wallet Amount: {player.wallet_amount}")
+            f"You cant play more bets: You wallet Amount: {player.get_wallet_amount()}")
         break

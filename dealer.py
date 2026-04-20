@@ -1,7 +1,10 @@
-class Dealer:
-    def __init__(self):
-        self.name = "dealer"
-        self.dealer_cards = []
+from user import User
 
-    def add_card(self, new_card):
-        self.dealer_cards.append(new_card)
+
+class Dealer(User):
+    def __init__(self, name="Dealer"):
+        super().__init__(name)
+
+    def show_dealer_cards_half(self):
+        print(
+            f"{self.name}'s Cards are : [{self.hand_cards[0].rank}, 'X-hidden']")

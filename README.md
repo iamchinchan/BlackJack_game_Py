@@ -1,53 +1,59 @@
 # Blackjack: Modular Python Project (2026)
 
-## Overview
+## 📌 Overview
 
-This is a playable Blackjack game built using **Python 3**. This project is a complete rewrite of my 2024 version, focusing on organizing the code into separate files to make it easier to read and maintain.
-
----
-
-## File Structure
-
-Instead of one long script, the game is split into several files to keep the logic organized:
-
-- **`main.py`**: The main entry point where the game loop runs.
-- **`card.py` & `deck.py`**: These handle creating the cards and shuffling the deck.
-- **`player.py` & `dealer.py`**: Manage the hands and actions for the player and the dealer.
-- **`globals.py`**: Stores card names, suits, and point values in one place.
-- **`helper_functions.py`**: Contains the logic for calculating scores and getting user input.
+This is a fully playable, object-oriented Blackjack game built with **Python 3**. This project represents a complete redesign of my original 2024 script, focusing on clean code, modularity, and better organization.
 
 ---
 
-## How the Scoring Works
+## 🏗️ Project Structure
 
-The game includes logic to handle **Aces** automatically. If your hand goes over 21 and you have an Ace, the game changes that Ace's value from 11 down to 1 so you stay in the game.
+Instead of one long file, the game is split into specific modules to keep the logic clear and easy to manage:
+
+- **`main.py`**: The entry point that controls the game flow and betting rounds.
+- **`user.py`**: A parent class that handles shared logic like card sums and Blackjack checks for both the Player and Dealer.
+- **`player.py` & `dealer.py`**: Specific classes that inherit from `User` to manage wallets and dealer-specific card views.
+- **`card.py` & `deck.py`**: Logic for creating cards and managing a 52-card deck that shuffles automatically if it runs out.
+- **`globals.py`**: A central file for game constants like Suits, Ranks, and card Values.
+- **`helper_functions.py`**: Handles all user inputs and the final game results.
+
+---
+
+## 🧠 Key Features
+
+### 1. Automatic Ace Handling
+
+The game automatically calculates whether an Ace should be worth **11 or 1**. If your total goes over 21, it reduces the Ace value to keep you in the game.
 
 ```python
-while total > 21 and aces > 0:
-    total -= 10
+while self.card_sum > 21 and aces > 0:
+    self.card_sum -= 10
     aces -= 1
+
 ```
 
-Improvements: 2024 vs. 2026
-This version shows how my coding style has improved over the last two years:
+2. Standard Dealer Rules (The 17 Rule)
+   The dealer follows professional casino rules: they must keep drawing cards until their total is at least 17, after which they must stay.
 
-Better Organization: Moved from a single script to a multi-file package.
+3. Error-Proof Inputs
+   The game is designed to stay running even if a user makes a mistake. It uses validation loops to ensure you enter valid bets and choices without crashing the program.
 
-Cleaner Code: Uses classes and local variables instead of relying on global variables.
+📈 The Journey: 2024 vs. 2026
+This version highlights my growth in software development over the last two years:
 
-Better Inputs: The game checks for errors, like entering a bet higher than your balance, so the program doesn't crash.
+From Scripts to Systems: Moved from a single procedural script to an Object-Oriented (OOP) structure using Inheritance.
 
-Future Updates
-[ ] Tie Logic: Add rules for a "Push" when scores are equal.
+Better Memory Management: Objects like the Deck and Hand are reset properly between rounds to keep the game efficient.
 
-[ ] Code Cleanup: Combine shared parts of the Player and Dealer files using inheritance.
+Clean Logic: Replaced messy global variables with a dedicated globals.py and local class attributes.
 
-[ ] Dealer Blackjack: Check if the dealer has 21 immediately at the start of the round.
+🛠️ Future Roadmap
+[ ] Double Down: Add the option for players to double their bet for one extra card.
 
-How to Run
-Ensure you have Python 3 installed.
+🚀 How to Run
+Ensure you have Python 3 installed on your system.
 
-Run the following command in your terminal:
+Download or clone this repository.
 
-Bash
+Open your terminal in the project folder and run:
 python main.py

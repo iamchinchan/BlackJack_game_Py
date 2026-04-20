@@ -14,6 +14,9 @@ class Deck:
         shuffle(self.deck_card)
 
     def draw_one(self):
+        if len(self.deck_card) == 0:
+            self.__init__()
+            self.deck_shuffle()
         return self.deck_card.pop()
     # no need to check if decks empty as for Blackjack game,either of players will either bust or win before deck is empty
     # And for each new Bet, new deck object can be created from this Deck class and old one can be released from memory
